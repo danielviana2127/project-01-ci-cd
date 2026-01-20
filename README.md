@@ -136,7 +136,7 @@ Este projeto pode ser executado de **três formas diferentes**, dependendo do ob
 * Apenas executar a aplicação
 
 ```bash
-docker run -p 8080:8080 project-01-ci-cd
+docker run -p 8080:8080 dvianaa/project-01-ci-cd:latest
 ```
 
 📌 **Motivo:** reutiliza a imagem existente, mais rápido e alinhado com produção.
