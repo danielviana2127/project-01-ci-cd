@@ -1,163 +1,155 @@
-# Projeto 01 – CI/CD Completo com Java, Docker e Segurança
+# Project 01 – CI/CD Completo com Java, Docker e Segurança
 
-## 🎯 Objetivo do Projeto
+## 📌 Status do Projeto
 
-Este projeto tem como objetivo demonstrar, de forma prática, a construção de uma **aplicação simples em Java** integrada a um **pipeline CI/CD completo**, aplicando conceitos essenciais de **DevOps**, como:
-
-* Automação de build
-* Criação de imagens Docker
-* Segurança integrada ao pipeline (Shift Left)
-* Publicação automática de imagens
-* Documentação clara e objetiva
-
-O foco não é a complexidade da aplicação, mas sim a **qualidade do pipeline, segurança e clareza do processo**.
+✅ Pipeline CI/CD funcional
+✅ Imagem Docker publicada
+✅ Scan de segurança ativo (Trivy)
 
 ---
 
-## 🚀 O que o projeto faz
+## 📖 Sobre o Projeto
 
-A aplicação é uma **API REST simples em Java (Spring Boot)** que responde a uma requisição HTTP com uma mensagem de status, servindo como base para validar:
+Este projeto consiste em uma **API Java simples (Spring Boot)** com um **pipeline CI/CD completo**, cobrindo desde o build da aplicação até a publicação da imagem Docker, incluindo **análise de segurança automatizada**.
 
-* Build automatizado
-* Containerização
-* Scan de vulnerabilidades
-* Deploy de imagem em registry
-
-Endpoint disponível:
-
-```
-GET /
-```
-
-Resposta:
-
-```
-🚀 API Java rodando com CI/CD completo!
-```
+O foco não é apenas fazer a aplicação rodar, mas **explicar e justificar cada decisão técnica**, simulando um ambiente real de entrega contínua.
 
 ---
 
-## 🏗️ Arquitetura do Projeto
-
-Arquitetura simplificada do fluxo CI/CD:
+## 🏗️ Arquitetura
 
 ```
-Desenvolvedor
-     |
-     v
-GitHub (push)
-     |
-     v
+Developer Push
+      |
+      v
+GitHub Repository
+      |
+      v
 GitHub Actions (CI/CD)
- ├── Build Java (Maven)
- ├── Build da imagem Docker
- ├── Scan de segurança (Trivy)
- └── Push da imagem
-     |
-     v
-Docker Hub (Registry)
+  ├─ Build Maven (Java)
+  ├─ Build Docker Image
+  ├─ Security Scan (Trivy)
+  └─ Push Docker Hub
+      |
+      v
+Docker Hub (Imagem publicada)
 ```
 
-Essa arquitetura garante **automação, rastreabilidade e segurança desde o código até a imagem final**.
+---
+
+## 📂 Estrutura do Repositório
+
+```
+project-01-ci-cd/
+├── app/                    # Aplicação Java (Spring Boot)
+│   ├── pom.xml
+│   └── src/
+├── Dockerfile              # Build da imagem da aplicação
+├── .github/workflows/
+│   └── ci.yml              # Pipeline CI/CD
+├── .env.example            # Exemplo de variáveis de ambiente
+├── README.md
+```
+
+📌 **Decisão técnica**: a aplicação Java fica isolada na pasta `app/`, permitindo melhor organização e facilitando escalabilidade do repositório.
 
 ---
 
-## ⚙️ Pipeline CI/CD – Explicação passo a passo
+## 🔄 Pipeline CI/CD (Passo a Passo)
 
-O pipeline é executado automaticamente a cada `push` na branch `main`.
+O pipeline é executado automaticamente a cada **push ou pull request para a branch `main`**.
 
-### 1️⃣ Checkout do código
+### 1️⃣ Checkout do Código
 
-O GitHub Actions clona o repositório para o runner, garantindo que o pipeline sempre execute com o código mais recente.
+O código é clonado para o runner do GitHub Actions.
 
-**Por quê?**
-Garante consistência e evita builds manuais ou ambientes divergentes.
+### 2️⃣ Build e Testes (Maven)
 
----
+O Maven é executado **dentro da pasta `app/`**, onde está o `pom.xml`:
 
-### 2️⃣ Build e Testes da Aplicação
+* Compila o projeto
+* Executa testes
+* Gera o JAR da aplicação
 
-A aplicação Java é compilada utilizando **Maven**.
-
-**Por quê?**
-Detecta erros de compilação logo no início do pipeline, reduzindo falhas em produção.
+📌 **Motivo**: evita erros de build e mantém separação clara entre código e infraestrutura.
 
 ---
 
 ### 3️⃣ Build da Imagem Docker
 
-A imagem é criada usando **Docker multi-stage build**, separando:
+Após o build do JAR, é criada uma imagem Docker da aplicação.
 
-* Etapa de build
-* Etapa de execução
-
-**Por quê?**
-
-* Reduz o tamanho da imagem final
-* Remove dependências desnecessárias
-* Melhora segurança e performance
+* A imagem contém apenas o necessário para execução
+* O JAR é copiado da pasta `app/target`
 
 ---
 
 ### 4️⃣ Scan de Segurança com Trivy
 
-A imagem Docker é analisada pelo **Trivy**, verificando vulnerabilidades conhecidas.
+A imagem Docker é analisada pelo **Trivy**, identificando vulnerabilidades conhecidas.
 
-Configuração:
+🔐 Configuração adotada:
 
-* Severidades: `HIGH` e `CRITICAL`
-* Pipeline **falha automaticamente** se vulnerabilidades críticas forem encontradas
+* Severidade analisada: **HIGH e CRITICAL**
+* Modo **informativo (non-blocking)**
 
-**Por quê?**
+📌 **Decisão técnica**:
+Este é um projeto educacional, portanto o scan **não bloqueia o pipeline**, mas fornece visibilidade total das vulnerabilidades.
 
-* Aplica o conceito de **Shift Left Security**
-* Evita que imagens inseguras sejam publicadas
-* Segurança integrada ao processo, não opcional
-
----
-
-### 5️⃣ Push da Imagem para o Registry
-
-Após passar por todas as etapas, a imagem é publicada automaticamente no **Docker Hub**.
-
-**Por quê?**
-
-* Garante versionamento
-* Facilita deploy futuro (Kubernetes, ECS, etc.)
-* Elimina processos manuais
+> Em ambientes produtivos, este step pode ser configurado para falhar o pipeline.
 
 ---
 
-## 🔐 Segurança Aplicada no Projeto
+### 5️⃣ Push da Imagem
 
-Este projeto aplica segurança em múltiplas camadas:
+Após o scan, a imagem é publicada automaticamente no **Docker Hub**.
 
-* 🔍 **Trivy** para análise de vulnerabilidades
-* 🐳 **Docker multi-stage build**
-* 📦 Imagem base mínima (JRE)
-* 🔑 Secrets gerenciados via GitHub Actions
-* ❌ Nenhuma credencial hardcoded
-* 📜 Pipeline falha automaticamente em caso de risco
-
-Essas práticas seguem padrões reais de ambientes profissionais.
+✔ Versionamento controlado
+✔ Imagem pronta para uso em Kubernetes ou Docker
 
 ---
 
-## 🖥️ Como rodar o projeto localmente
+## 🔐 Segurança Aplicada
 
-### ▶️ Executando com Java
+* Scan automático de vulnerabilidades (Trivy)
+* Credenciais sensíveis armazenadas via **GitHub Secrets**
+* Nenhuma senha ou token versionado no repositório
 
-Pré-requisitos:
+Secrets utilizados:
+
+* `DOCKER_USER`
+* `DOCKER_PASSWORD`
+
+---
+
+## ▶️ Como Rodar Localmente
+
+### Pré-requisitos
 
 * Java 17+
 * Maven
+* Docker
+
+### Passos
 
 ```bash
+# Entrar na aplicação
 cd app
-mvn spring-boot:run
+
+# Build do projeto
+mvn clean package
+
+# Voltar para a raiz
+cd ..
+
+# Build da imagem Docker
+docker build -t project-01-ci-cd .
+
+# Rodar a aplicação
+docker run -p 8080:8080 project-01-ci-cd
 ```
 
-Acesse:
+A aplicação ficará disponível em:
 
 ```
 http://localhost:8080
@@ -165,64 +157,33 @@ http://localhost:8080
 
 ---
 
-### 🐳 Executando com Docker
+## 🤖 Como o Pipeline Roda
 
-```bash
-docker build -t project-01-ci-cd .
-docker run -p 8080:8080 project-01-ci-cd
-```
+1. Realize um push para a branch `main`
+2. O GitHub Actions inicia automaticamente
+3. Todos os steps são executados
+4. A imagem final é publicada no Docker Hub
 
----
-
-## 🤖 Como rodar via pipeline CI/CD
-
-### 1️⃣ Configurar secrets no GitHub
-
-No repositório, adicione os seguintes secrets:
-
-* `DOCKER_USER` → usuário do Docker Hub
-* `DOCKER_PASSWORD` → token ou senha do Docker Hub
-
-### 2️⃣ Executar o pipeline
-
-```bash
-git push origin main
-```
-
-O pipeline será executado automaticamente, seguindo todas as etapas de CI/CD e segurança.
+📌 Logs claros são exibidos em cada etapa do pipeline.
 
 ---
 
-## 📁 Estrutura do Projeto
+## 🎯 Conclusão Técnica
 
-```bash
-project-01-ci-cd/
-├── app/
-│   └── Código da aplicação Java
-├── Dockerfile
-├── .github/workflows/ci.yml
-├── .env.example
-└── README.md
-```
+Este projeto demonstra:
 
----
+* CI/CD funcional de ponta a ponta
+* Integração entre Java, Docker e GitHub Actions
+* Segurança aplicada desde o pipeline
+* Decisões técnicas claras e justificadas
 
-## ✅ Critérios de Conclusão Atendidos
-
-✔ Pipeline roda sem erro
-✔ Imagem Docker publicada
-✔ Scan de segurança com Trivy ativo
-✔ Logs claros no pipeline
-✔ README explica **o porquê**, não apenas o **como**
+> O objetivo não é apenas automatizar, mas **entender e explicar cada etapa do processo**.
 
 ---
 
-## 👨‍💻 Autor
+## 👤 Autor
 
 **Daniel Viana**
+
 GitHub: [https://github.com/danielviana2127](https://github.com/danielviana2127)
-
----
-
-📌 *Este projeto faz parte de um plano de estudos focado em DevOps, CI/CD, segurança e boas práticas de engenharia de software.*
 
