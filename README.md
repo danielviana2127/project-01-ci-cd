@@ -124,29 +124,55 @@ Secrets utilizados:
 
 ## ▶️ Como Rodar Localmente
 
-### Pré-requisitos
+Este projeto pode ser executado de **três formas diferentes**, dependendo do objetivo. Cada cenário existe para evitar rebuilds desnecessários e simular práticas reais de desenvolvimento e produção.
 
-* Java 17+
-* Maven
-* Docker
+---
 
-### Passos
+### 🔹 Cenário 1 — Rodar a aplicação via Docker (imagem já existente)
+
+**Quando usar:**
+
+* Nenhuma alteração no código
+* Apenas executar a aplicação
 
 ```bash
-# Entrar na aplicação
-cd app
-
-# Build do projeto
-mvn clean package
-
-# Voltar para a raiz
-cd ..
-
-# Build da imagem Docker
-docker build -t project-01-ci-cd .
-
-# Rodar a aplicação
 docker run -p 8080:8080 project-01-ci-cd
+```
+
+📌 **Motivo:** reutiliza a imagem existente, mais rápido e alinhado com produção.
+
+---
+
+### 🔹 Cenário 2 — Alterei o código Java
+
+**Quando usar:**
+
+* Alterações na aplicação
+* Necessário gerar novo JAR e imagem
+
+```bash
+cd app
+mvn clean package
+cd ..
+docker build -t project-01-ci-cd .
+docker run -p 8080:8080 project-01-ci-cd
+```
+
+📌 **Motivo:** qualquer mudança no código exige rebuild da imagem Docker.
+
+---
+
+### 🔹 Cenário 3 — Desenvolvimento local (sem Docker)
+
+**Quando usar:**
+
+* Desenvolvimento
+* Debug rápido
+* Ambiente local
+
+```bash
+cd app
+mvn spring-boot:run
 ```
 
 A aplicação ficará disponível em:
@@ -154,6 +180,8 @@ A aplicação ficará disponível em:
 ```
 http://localhost:8080
 ```
+
+📌 **Motivo:** ciclo de feedback mais rápido, sem overhead de container.
 
 ---
 
