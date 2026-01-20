@@ -33,6 +33,7 @@ jobs:
       - name: 🧪 Build e testes com Maven
         run: |
           echo "🔧 Executando build Maven"
+          cd app
           mvn clean package -DskipTests=false
 
       # ===============================
